@@ -72,9 +72,10 @@ jobs:
       SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug || vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
       ARTIFACT_CONFIGURATION_SLUG: ${{ github.event.inputs.artifact_configuration_slug || vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG || '' }}
     steps:
-      - name: Submit signing request (default artifact configuration)
+      - name: Submit signing request (default artifact configuration) - attempt 1
         if: env.ARTIFACT_CONFIGURATION_SLUG == ''
-        id: signpath_default
+        id: signpath_default_try1
+        continue-on-error: true
         uses: signpath/github-action-submit-signing-request@v1
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
@@ -86,9 +87,84 @@ jobs:
           wait-for-completion: true
           output-artifact-directory: signed
 
-      - name: Submit signing request (custom artifact configuration)
+      - name: Wait before retry (default)
+        if: env.ARTIFACT_CONFIGURATION_SLUG == '' && steps.signpath_default_try1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Submit signing request (default artifact configuration) - attempt 2
+        if: env.ARTIFACT_CONFIGURATION_SLUG == '' && steps.signpath_default_try1.outcome == 'failure'
+        id: signpath_default_try2
+        continue-on-error: true
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          github-token: ${{ github.token }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Wait before final retry (default)
+        if: env.ARTIFACT_CONFIGURATION_SLUG == '' && steps.signpath_default_try1.outcome == 'failure' && steps.signpath_default_try2.outcome == 'failure'
+        run: sleep 40
+
+      - name: Submit signing request (default artifact configuration) - attempt 3
+        if: env.ARTIFACT_CONFIGURATION_SLUG == '' && steps.signpath_default_try1.outcome == 'failure' && steps.signpath_default_try2.outcome == 'failure'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          github-token: ${{ github.token }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Submit signing request (custom artifact configuration) - attempt 1
         if: env.ARTIFACT_CONFIGURATION_SLUG != ''
-        id: signpath_custom
+        id: signpath_custom_try1
+        continue-on-error: true
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          github-token: ${{ github.token }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Wait before retry (custom)
+        if: env.ARTIFACT_CONFIGURATION_SLUG != '' && steps.signpath_custom_try1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Submit signing request (custom artifact configuration) - attempt 2
+        if: env.ARTIFACT_CONFIGURATION_SLUG != '' && steps.signpath_custom_try1.outcome == 'failure'
+        id: signpath_custom_try2
+        continue-on-error: true
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          github-token: ${{ github.token }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Wait before final retry (custom)
+        if: env.ARTIFACT_CONFIGURATION_SLUG != '' && steps.signpath_custom_try1.outcome == 'failure' && steps.signpath_custom_try2.outcome == 'failure'
+        run: sleep 40
+
+      - name: Submit signing request (custom artifact configuration) - attempt 3
+        if: env.ARTIFACT_CONFIGURATION_SLUG != '' && steps.signpath_custom_try1.outcome == 'failure' && steps.signpath_custom_try2.outcome == 'failure'
         uses: signpath/github-action-submit-signing-request@v1
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
