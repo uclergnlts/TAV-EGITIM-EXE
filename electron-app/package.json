@@ -49,7 +49,6 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "requestedExecutionLevel": "asInvoker",
       "sign": null
@@ -62,10 +61,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "TAV Eğitim Sistemi",
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico",
-      "installerHeader": "assets/header.bmp",
-      "installerSidebar": "assets/sidebar.bmp",
       "deleteAppDataOnUninstall": false,
       "perMachine": false
     },
