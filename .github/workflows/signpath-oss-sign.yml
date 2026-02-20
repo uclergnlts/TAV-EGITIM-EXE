@@ -84,6 +84,9 @@ jobs:
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
@@ -103,6 +106,9 @@ jobs:
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
@@ -120,6 +126,9 @@ jobs:
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
@@ -136,6 +145,9 @@ jobs:
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
@@ -156,6 +168,9 @@ jobs:
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
@@ -174,6 +189,9 @@ jobs:
           signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
           artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
           github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          service-unavailable-timeout-in-seconds: 1800
+          wait-for-completion-timeout-in-seconds: 3600
+          download-signed-artifact-timeout-in-seconds: 900
           wait-for-completion: true
           output-artifact-directory: signed
 
