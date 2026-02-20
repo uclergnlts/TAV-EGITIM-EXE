@@ -1,0 +1,107 @@
+﻿name: Sign Windows Release (SignPath OSS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      signing_policy_slug:
+        description: "SignPath signing policy slug"
+        required: false
+        default: "release-signing"
+      artifact_configuration_slug:
+        description: "Optional SignPath artifact configuration slug"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-unsigned:
+    name: Build Unsigned Windows Artifacts
+    runs-on: windows-latest
+    outputs:
+      unsigned_artifact_id: ${{ steps.upload_unsigned.outputs.artifact-id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Install electron dependencies
+        run: npm ci
+        working-directory: electron-app
+
+      - name: Build unsigned Windows executables
+        run: npx electron-builder --win --x64 --publish never
+        working-directory: electron-app
+
+      - name: Collect unsigned files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\unsigned | Out-Null
+          Copy-Item dist\*.exe dist\unsigned\ -Force
+          Compress-Archive -Path dist\unsigned\* -DestinationPath dist\unsigned-windows.zip -Force
+
+      - name: Upload unsigned artifact
+        id: upload_unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-windows
+          path: dist/unsigned-windows.zip
+          if-no-files-found: error
+
+  sign-with-signpath:
+    name: Sign With SignPath
+    runs-on: ubuntu-latest
+    needs: build-unsigned
+    env:
+      SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug || vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+      ARTIFACT_CONFIGURATION_SLUG: ${{ github.event.inputs.artifact_configuration_slug || vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG || '' }}
+    steps:
+      - name: Submit signing request (default artifact configuration)
+        if: env.ARTIFACT_CONFIGURATION_SLUG == ''
+        id: signpath_default
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Submit signing request (custom artifact configuration)
+        if: env.ARTIFACT_CONFIGURATION_SLUG != ''
+        id: signpath_custom
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ env.ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ needs.build-unsigned.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Upload signed artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-windows
+          path: signed/**
+          if-no-files-found: error

@@ -25,13 +25,14 @@
     "files": [
       "main.js",
       "preload.js",
-      "../out/**/*",
-      "../.next/**/*",
-      "../node_modules/**/*",
-      "../package.json"
+      "../.next/standalone/**/*",
+      "../.next/static/**/*",
+      "../public/**/*",
+      "../.env",
+      "../local.db"
     ],
     "extraMetadata": {
-      "main": "electron-app/main.js"
+      "main": "main.js"
     },
     "win": {
       "target": [
@@ -50,11 +51,8 @@
       ],
       "icon": "assets/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "certificateFile": "assets/certificate.pfx",
-      "certificatePassword": "${CERT_PASSWORD}",
-      "signAndEditExecutable": true,
-      "signDlls": true,
-      "requestedExecutionLevel": "asInvoker"
+      "requestedExecutionLevel": "asInvoker",
+      "sign": null
     },
     "nsis": {
       "oneClick": false,
@@ -78,12 +76,13 @@
       "provider": "github",
       "owner": "tav-egitim",
       "repo": "tav-egitim-desktop"
-    }
+    },
+    "asar": false
   },
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
-    "electron-is-dev": "^2.0.0"
-  },
-  "dependencies": {}
+    "electron-is-dev": "^2.0.0",
+    "electron-packager": "^17.1.2"
+  }
 }
