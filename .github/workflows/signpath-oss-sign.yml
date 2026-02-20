@@ -42,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Install electron dependencies
-        run: npm ci
+        run: npm install
         working-directory: electron-app
 
       - name: Build unsigned Windows executables
